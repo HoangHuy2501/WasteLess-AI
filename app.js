@@ -8,9 +8,11 @@ var cors = require('./config/cors');
 //middleware
 var errorsHandler= require('./middleware/errorHandler');
 var successHandler= require('./middleware/SuccessHandle');
+var authenticate = require('./middleware/authenticate');
 //routes
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var authRouter = require('./routes/authRoutes');
 //test
 var AuthController = require('./controller/AuthController');
 var app = express();
@@ -34,9 +36,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-
-
-app.use('/', indexRouter);
+app.use('/api/auth', authRouter);
+app.use(authenticate);
+// api phải có token mới được truy cập
+//....
 app.use('/users', usersRouter);
 app.use(successHandler);
 app.use(errorsHandler);

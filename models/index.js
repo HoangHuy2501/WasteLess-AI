@@ -16,6 +16,7 @@ const AiAnalysisModel = require('./AiAnalysisModel');
 const AiAnalysisDetailModel = require('./AiAnalysisDetailModel');
 const MessageModel = require('./MessageModel');
 const DetailMessageModel = require('./DetailMessageModel');
+const RefreshTokenModel = require('./Refresh_token');
 
 /* ===== BRAND ===== */
 BrandModel.hasMany(UserModel, { foreignKey: 'brand_id' });
@@ -39,6 +40,9 @@ RoleModel.belongsToMany(UserModel, { through: UserRoleModel, foreignKey: 'role_i
 
 RoleModel.belongsToMany(PermissionModel, { through: RolePermissionModel, foreignKey: 'role_id', otherKey: 'permission_id' });
 PermissionModel.belongsToMany(RoleModel, { through: RolePermissionModel, foreignKey: 'permission_id', otherKey: 'role_id' });
+/* ===== USER – REFRESH_TOKEN ===== */
+UserModel.hasMany(RefreshTokenModel, { foreignKey: 'user_id' });
+RefreshTokenModel.belongsTo(UserModel, { foreignKey: 'user_id' });
 
 /* ===== DISH CATEGORY ===== */
 DishCategoryModel.hasMany(DishModel, { foreignKey: 'dish_category_id' });
@@ -114,5 +118,6 @@ module.exports = {
   AiAnalysisModel,
   AiAnalysisDetailModel,
   MessageModel,
-  DetailMessageModel
+  DetailMessageModel,
+  RefreshTokenModel
 };

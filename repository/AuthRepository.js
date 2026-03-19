@@ -1,9 +1,40 @@
-const {UserModel, BrandModel} = require('../models/index');
-
-class AuthRepository {
-    async getInfoUser() {
-        // return await UserModel.findOne({ where: { email } });
-        return await BrandModel.findAll()
+const {UserModel, UserRoleModel, BrandModel, RoleModel, RefreshTokenModel} = require('../models/index');
+class AuthRepository{
+    async SelectMail (email){
+        return await UserModel.findOne({
+            where: {email: email},
+            attributes: ['id', 'email', 'name', "password"],
+            include: [{
+                model: RoleModel,
+                attributes: ['name'],
+                through: { attributes: [] } 
+            }],
+        });
+    }
+    async createUser (data, brandID,options = {}){
+        return await UserModel.create({...data, brand_id: brandID}, {raw: true, nest: true, ...options});
+    }
+    async createBrand(data,options = {}){
+        return await BrandModel.create(data,{raw: true, nest: true, ...options});
+    }
+    async createRole(userId, roleId,options = {}){
+        return await UserRoleModel.create({user_id: userId, role_id: roleId},{...options});
+    }
+    // xóa refresh token
+    async deleteRefreshToken(id) {
+        return await RefreshTokenModel.destroy({where: {user_id: id}});
+    }
+    // lưu refresh token
+    async saveRefreshToken(token, id) {
+        return await RefreshTokenModel.create({token: token, user_id: id});
+    }
+    // kiểm tra refresh token
+    async checkRefreshToken(id) {
+        return await RefreshTokenModel.findOne({where: {user_id: id}});
+    }
+    // check user active
+    async checkUserActive(id) {
+        return await UserModel.findOne({where: {id: id, status: true}});
     }
 }
-module.exports = new AuthRepository();
+module.exports =  new AuthRepository();

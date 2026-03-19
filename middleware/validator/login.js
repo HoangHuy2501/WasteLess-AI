@@ -1,6 +1,6 @@
 const { body, validationResult } = require("express-validator");
 const ApiError = require("../../utils/ApiError");
-const cloudinary = require("../../config/connectCloudinary");
+// const cloudinary = require("../../config/connectCloudinary");
 const ErrorMessageBase = require("../../utils/ErrorMessageBase");
 const validateUser = [
   body("email").notEmpty().withMessage(ErrorMessageBase.format(ErrorMessageBase.NotEmpity, { PropertyName: "email"})).bail().isEmail().withMessage(ErrorMessageBase.InvalidEmail),
@@ -8,9 +8,9 @@ const validateUser = [
   async(req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        if(req.file && req.file.publicId){
-      await cloudinary.uploader.destroy(req.file.publicId)
-    }
+    //     if(req.file && req.file.publicId){
+    //   await cloudinary.uploader.destroy(req.file.publicId)
+    // }
     const formattedErrors = errors.array().map(err => ({
       field: err.path,
       message: err.msg

@@ -4,7 +4,7 @@ const ErrorMessageBase = {
     NotEmpity: "{PropertyName} must not be empty", // không được để trống
     Incorrect: "{PropertyName} is incorrect", // "{PropertyName} khong dung"
     ActiveFalse: "{PropertyName} is inactive", // "{PropertyName} khong hoat dong"
-    ExitRentProduct: "{PropertyName} is already in use",// "{PropertyName} da duoc su dung"
+    EXIST: "{PropertyName} is already in use",// "{PropertyName} da duoc su dung"
 
     Required: "{PropertyName} is required",
     InvalidEmail: "Invalid email format", // "Định dạng email không hợp lệ"
