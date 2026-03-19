@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var database= require('./config/connectData');
 var cors = require('./config/cors');
+const {UserModel}= require('./models/index');
 //middleware
 var errorsHandler= require('./middleware/errorHandler');
 var successHandler= require('./middleware/SuccessHandle');
@@ -35,6 +36,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/api/ping', (req, res) => {
+  const user= UserModel.findByPk('94292bfd-19e8-4079-b67f-a2f22961738b');
+  res.send('Server is alive ✅');
+});
 
 app.use('/api/auth', authRouter);
 app.use(authenticate);
