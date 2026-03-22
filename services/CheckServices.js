@@ -89,5 +89,17 @@ class CheckServices {
             throw error;
         }
     }
+    // check id dish có tồn tại hay không
+    async checkDish(id) {
+        try {
+            const dish = await CheckRepository.checkDish(id);
+            if(!dish){
+                throw ApiError.NotFound("Dish not found");
+            }
+            return dish
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 module.exports = new CheckServices();

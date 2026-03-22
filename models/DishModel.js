@@ -33,7 +33,7 @@ const DishModel = sequelize.define('dishes', {
   },
   status: {
     type: DataTypes.BOOLEAN,
-    defaultValue: true
+    defaultValue: false
   }
 }, {
   tableName: 'dishes',

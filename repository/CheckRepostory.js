@@ -7,6 +7,10 @@ class CheckRepository {
     async checkCategoryDishes(id) {
         return await DishCategoryModel.findOne({where: {id: id}});
     }
+    async checkDish(id) {
+        const dish = await DishModel.findOne({where: {id: id}});
+        return dish;
+    }
 }
 
 module.exports = new CheckRepository();

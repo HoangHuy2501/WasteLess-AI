@@ -15,6 +15,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/usersRoutes');
 var authRouter = require('./routes/authRoutes');
 var ingredientRouter = require('./routes/ingredientRoutes');
+var dishRouter = require('./routes/dishRoutes');
 //test
 var AuthController = require('./controller/AuthController');
 var app = express();
@@ -48,6 +49,7 @@ app.use(authenticate);
 //....
 app.use('/api/users', usersRouter);
 app.use('/api/ingredients', ingredientRouter);
+app.use('/api/dishes', dishRouter);
 app.use(successHandler);
 app.use(errorsHandler);
 // catch 404 and forward to error handler
