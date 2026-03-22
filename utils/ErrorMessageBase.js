@@ -2,6 +2,7 @@
 const ErrorMessageBase = {
     missingFields: "Missing required fields:", // "Thieu thong tin"
     NotEmpity: "{PropertyName} must not be empty", // không được để trống
+    InvalidNumber: "{PropertyName} must be a valid number", // "{PropertyName} phải là một số hợp lệ"
     Incorrect: "{PropertyName} is incorrect", // "{PropertyName} khong dung"
     ActiveFalse: "{PropertyName} is inactive", // "{PropertyName} khong hoat dong"
     EXIST: "{PropertyName} is already in use",// "{PropertyName} da duoc su dung"

@@ -12,13 +12,16 @@ class AuthRepository{
         });
     }
     async createUser (data, brandID,options = {}){
-        return await UserModel.create({...data, brand_id: brandID}, {raw: true, nest: true, ...options});
+        return await UserModel.create({...data, brand_id: brandID}, { ...options});
     }
     async createBrand(data,options = {}){
         return await BrandModel.create(data,{raw: true, nest: true, ...options});
     }
     async createRole(userId, roleId,options = {}){
         return await UserRoleModel.create({user_id: userId, role_id: roleId},{...options});
+    }
+    async updateUser(data, id, options = {}) {
+        return await UserModel.update({name: data.name, email: data.email, phone: data.phone, address: data.address}, { where: { id: id }, ...options });
     }
     // xóa refresh token
     async deleteRefreshToken(id) {
@@ -34,7 +37,17 @@ class AuthRepository{
     }
     // check user active
     async checkUserActive(id) {
-        return await UserModel.findOne({where: {id: id, status: true}});
+        return await UserModel.findOne({
+            where: {id: id, status: true},
+            attributes:["status"],
+            include: [{
+                model: RoleModel,
+                attributes: ['name'],
+            },{
+                model: BrandModel,
+                attributes: ['id'],
+            }],
+        });
     }
 }
 module.exports =  new AuthRepository();

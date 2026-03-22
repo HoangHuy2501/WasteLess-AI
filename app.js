@@ -12,8 +12,9 @@ var successHandler= require('./middleware/SuccessHandle');
 var authenticate = require('./middleware/authenticate');
 //routes
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var usersRouter = require('./routes/usersRoutes');
 var authRouter = require('./routes/authRoutes');
+var ingredientRouter = require('./routes/ingredientRoutes');
 //test
 var AuthController = require('./controller/AuthController');
 var app = express();
@@ -45,7 +46,8 @@ app.use('/api/auth', authRouter);
 app.use(authenticate);
 // api phải có token mới được truy cập
 //....
-app.use('/users', usersRouter);
+app.use('/api/users', usersRouter);
+app.use('/api/ingredients', ingredientRouter);
 app.use(successHandler);
 app.use(errorsHandler);
 // catch 404 and forward to error handler

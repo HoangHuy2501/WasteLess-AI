@@ -104,7 +104,7 @@ exports.login= async (req, res, next) => {
         const token = jwt.sign(
         { userId: user.id, role: user.roles[0].name, name: user.name, email: user.email},
         process.env.JWT_SECRET,
-        { expiresIn: "10m" }
+        { expiresIn: "1d" }
         );
         // // refresh token (sống lâu hơn, ví dụ 7 ngày)
         const refreshToken = jwt.sign(

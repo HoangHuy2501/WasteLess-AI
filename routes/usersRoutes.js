@@ -1,0 +1,12 @@
+var express = require('express');
+var router = express.Router();
+var UserController = require('../controller/UserController');
+const authorize = require('../middleware/authorize');
+/* GET users listing. */
+router.post('/register-kitchen/:id', authorize(["Manager", "Admin"]), UserController.RegisterKitchen);
+router.put('/update-kitchen/:id', UserController.UpdateKitchen);
+router.get('/info/:id', UserController.GetInfoUser);
+router.put('/lock-kitchen/:id', authorize(["Manager", "Admin"]), UserController.LockKitchen);
+router.put('/unlock-kitchen/:id', authorize(["Manager", "Admin"]), UserController.UnlockKitchen);
+
+module.exports = router;

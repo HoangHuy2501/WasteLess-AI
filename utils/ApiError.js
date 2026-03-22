@@ -33,6 +33,9 @@ class ApiError extends Error {
     static Internal(message = "Lỗi server") {
         return new ApiError("InternalServerError", message, 500);
     }
+    static Notification(message = "Thông báo") {
+        return new ApiError("Notification", message, 200);
+    }
 }
 
 module.exports = ApiError;

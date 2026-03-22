@@ -1,10 +1,14 @@
 const AuthRepository = require("../repository/AuthRepository");
+const CheckRepository = require("../repository/CheckRepostory");
 const ApiError = require("../utils/ApiError");
 const ErrorMessageBase = require("../utils/ErrorMessageBase");
 const bcrypt = require('bcryptjs'); 
 class CheckServices {
     async checkMailExit(email) {
         try {
+            if (!email){
+                throw ApiError.ValidationError(ErrorMessageBase.format(ErrorMessageBase.REQUIRED, { PropertyName: "email" }));
+            }
             // check email tồn tại
             const check = await AuthRepository.SelectMail(email);
             if(check){
@@ -57,6 +61,30 @@ class CheckServices {
                 throw ApiError.Unauthorized("User is not active");
             }
             return user
+        } catch (error) {
+            throw error;
+        }
+    }
+    // check category của ingredient
+    async checkCategoryIngredient(id) {
+        try {
+            const category = await CheckRepository.checkCategoryIngredient(id);
+            if(!category){
+                throw ApiError.NotFound("Category not found");
+            }
+            return category
+        } catch (error) {
+            throw error;
+        }
+    }
+    // check category của dishes
+    async checkCategoryDishes(id) {
+        try {
+            const category = await CheckRepository.checkCategoryDishes(id);
+            if(!category){
+                throw ApiError.NotFound("Category not found");
+            }
+            return category
         } catch (error) {
             throw error;
         }

@@ -7,16 +7,19 @@ function responseHandler(req, res, next) {
 
   res.json = (data) => {
     // Nếu controller đã gửi success = true theo chuẩn ApiSuccess thì thôi
-     if (data && data.success === true) {
+    if (data && data.success === true) {
       return originalJson(data);
     }
-    if (data && data.success === false) {
+    // Nếu là ApiError (có type và status), không can thiệp - để errorHandler xử lý
+    if (data && data.type && typeof data.status === "number") {
       return originalJson(data);
     }
     // Còn nếu controller chỉ gửi raw data thì tự bọc lại thành ApiSuccess
-    return originalJson(ApiSuccess.response({
-      data
-    }));
+    return originalJson(
+      ApiSuccess.response({
+        data,
+      }),
+    );
   };
 
   next();
