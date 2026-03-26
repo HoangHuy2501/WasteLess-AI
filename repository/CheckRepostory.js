@@ -15,6 +15,10 @@ class CheckRepository {
     async AllBrand() {
         return await BrandModel.findAll({attributes: ['id'], where: {status: true}});
     }
+    // check brand
+    async checkBrand(id) {
+        return await BrandModel.findOne({where: {id: id, status: true}});
+    }
 }
 
 module.exports = new CheckRepository();

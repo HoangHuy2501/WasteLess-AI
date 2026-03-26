@@ -101,5 +101,17 @@ class CheckServices {
             throw error;
         }
     }
+    // check brand
+    async checkBrand(id) {
+        try {
+            const brand = await CheckRepository.checkBrand(id);
+            if(!brand){
+                throw ApiError.NotFound("Brand not found");
+            }
+            return brand
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 module.exports = new CheckServices();

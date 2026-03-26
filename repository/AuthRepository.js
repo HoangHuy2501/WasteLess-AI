@@ -8,6 +8,9 @@ class AuthRepository{
                 model: RoleModel,
                 attributes: ['name'],
                 through: { attributes: [] } 
+            },{
+                model: BrandModel,
+                attributes: ['id'],
             }],
         });
     }

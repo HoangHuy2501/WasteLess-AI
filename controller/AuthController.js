@@ -97,12 +97,12 @@ exports.login= async (req, res, next) => {
     try {
         const data = req.body;
         const user = await CheckServices.checkMailPass(data.email, data.password);
-        // console.log("user", user);
+        // console.log("user", user.brand.id);
         // xóa refresh token cũ nếu có
         await AuthRepository.deleteRefreshToken(user.id);
         // access token (sống ngắn, ví dụ 1 giờ)
         const token = jwt.sign(
-        { userId: user.id, role: user.roles[0].name, name: user.name, email: user.email},
+        { userId: user.id, role: user.roles[0].name, name: user.name, email: user.email, brandID: user.brand?.id},
         process.env.JWT_SECRET,
         { expiresIn: "1d" }
         );

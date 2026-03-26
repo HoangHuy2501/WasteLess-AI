@@ -13,7 +13,7 @@ exports.CreateDishesForKitchen = async function (req, res, next) {
   try {
     const data = req.body;
     const brandID = req.params.brandID;
-    const userID = req.params.userID;
+    const userID = req.user?.userId;
     // console.log("data", data);
 
     if (!brandID || !userID) {
@@ -217,6 +217,24 @@ exports.UpdateDishesOutput = async function (req, res, next) {
         updateDishesOutput,
       ),
     );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// get danh sách món ăn ra hàng ngày theo day
+exports.GetDishesOutputByDate = async function (req, res, next) {
+  try {
+    const brandID = req.params.brandID;
+    if (!brandID) {
+      throw ApiError.ValidationError("Missing required field brandID");
+    }
+    const checkBrand = await CheckServices.checkBrand(brandID);
+    if (!checkBrand) {
+      throw ApiError.ValidationError("Brand not found with id: " + brandID);
+    }
+    const dishesOutput = await DailyRepository.GetDishesOutputByDate(brandID);
+    return res.json(ApiSuccess.getSelect("Dishes Output list", dishesOutput));
   } catch (error) {
     return next(error);
   }
