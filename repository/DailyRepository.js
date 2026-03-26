@@ -13,6 +13,9 @@ class DailyRepository {
                 operation_date: today
             }
         });
+        if (!operation) {
+            return null;
+        }
         return operation.id;
     }
     // lấy chi tiết daily detail
