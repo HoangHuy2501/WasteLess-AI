@@ -131,3 +131,16 @@ exports.UnlockKitchen = async function (req, res, next) {
     return next(error);
   }
 };
+// lấy danh sách nhân viên role Kitchen
+exports.GetKitchenStaff = async function (req, res, next) {
+  try {
+    const brandID = req.user.brandID;
+    if(!brandID){
+        throw ApiError.Unauthorized("Brand ID is required");
+    }
+    const getKitchenStaff = await UserRepository.getKitchenStaff(brandID);
+    return res.json(ApiSuccess.getSelect("Kitchen staff list", getKitchenStaff));
+  } catch (error) {
+    return next(error);
+  }
+};

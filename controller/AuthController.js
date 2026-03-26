@@ -149,7 +149,7 @@ exports.refreshToken= async (req, res, next) => {
       }
       // Tạo access token mới
       const newAccessToken = jwt.sign(
-        { userId: user.userId, role: decoded.role, name: decoded.name, email: decoded.email},
+        { userId: user.userId, role: decoded.role, name: decoded.name, email: decoded.email, brandID: decoded.brandID },
         process.env.JWT_SECRET,
         { expiresIn: "15m" }
       );
