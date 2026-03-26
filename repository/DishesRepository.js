@@ -53,6 +53,15 @@ class DishesRepository {
             throw error;
         }
     }
+    // get giá món ăn
+    async GetPriceDishByID(id) {
+        try {
+            const dish = await DishModel.findByPk(id);
+            return dish.price;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = new DishesRepository();

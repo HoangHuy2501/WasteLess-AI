@@ -31,6 +31,7 @@ exports.CreateDishes = async function (req, res, next) {
             throw ApiError.ValidationError("dish_recipes must be a non-empty array");
         }
         await CheckServices.checkCategoryDishes(data.dish_category_id);
+        data.status=true;
         const createDishes = await DishesRepository.CreateDishes(data, brandID , userID, { transaction: t });
         // tạo dish_recipes mới bằng vòng lặp
         await Promise.all(

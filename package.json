@@ -17,6 +17,7 @@
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.3",
     "morgan": "~1.9.1",
+    "node-cron": "^4.2.1",
     "pg": "^8.20.0",
     "sequelize": "^6.37.7",
     "winston": "^3.19.0"

@@ -16,6 +16,9 @@ var usersRouter = require('./routes/usersRoutes');
 var authRouter = require('./routes/authRoutes');
 var ingredientRouter = require('./routes/ingredientRoutes');
 var dishRouter = require('./routes/dishRoutes');
+var KitchenRouter= require('./routes/Kitchen/DishRoutes');
+// cron
+const { OperationDaily } = require('./routes/cron');
 //test
 var AuthController = require('./controller/AuthController');
 var app = express();
@@ -42,6 +45,7 @@ app.get('/api/ping', (req, res) => {
   const user= UserModel.findByPk('94292bfd-19e8-4079-b67f-a2f22961738b');
   res.send('Server is alive ✅');
 });
+OperationDaily();
 
 app.use('/api/auth', authRouter);
 app.use(authenticate);
@@ -50,6 +54,7 @@ app.use(authenticate);
 app.use('/api/users', usersRouter);
 app.use('/api/ingredients', ingredientRouter);
 app.use('/api/dishes', dishRouter);
+app.use('/api/kitchen', KitchenRouter);
 app.use(successHandler);
 app.use(errorsHandler);
 // catch 404 and forward to error handler
