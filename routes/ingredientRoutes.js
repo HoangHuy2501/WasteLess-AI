@@ -10,4 +10,5 @@ router.post('/add-ingredient-transaction/:id', authorize(["Manager", "Admin"]),v
 router.put('/update-ingredient/:ingredientID', authorize(["Manager", "Admin"]),validateIngredient, IngredientController.UpdateIngredient);
 router.delete('/delete-ingredient/:ingredientID', authorize(["Manager", "Admin"]), IngredientController.DeleteIngredient);
 router.get('/get-ingredient/:ingredientID', authorize(["Manager", "Admin"]), IngredientController.GetIngredient);
+router.get('/get-ingredients-by-brand', IngredientController.GetIngredientsByBrandID);
 module.exports = router;

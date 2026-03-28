@@ -77,6 +77,15 @@ class DishesRepository {
             throw error;
         }
     }
+    // get tất cả nguyên liệu của món ăn đó
+    async GetIngredientsByDishID(id) {
+        try {
+            const dishRecipes = await DishRecipeModel.findAll({ where: { dishes_id: id } });
+            return dishRecipes;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = new DishesRepository();

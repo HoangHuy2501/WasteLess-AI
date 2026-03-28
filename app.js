@@ -18,6 +18,7 @@ var ingredientRouter = require('./routes/ingredientRoutes');
 var dishRouter = require('./routes/dishRoutes');
 var KitchenRouter= require('./routes/Kitchen/DishRoutes');
 var categoryRouter= require('./routes/categoryRoutes');
+var DashboardRouter= require('./routes/dashboardRoutes');
 // cron
 const { OperationDaily } = require('./routes/cron');
 //test
@@ -53,6 +54,7 @@ app.use(authenticate);
 // api phải có token mới được truy cập
 //....
 app.use('/api/users', usersRouter);
+app.use('/api/dashboard', DashboardRouter);
 app.use('/api/ingredients', ingredientRouter);
 app.use('/api/dishes', dishRouter);
 app.use('/api/kitchen', KitchenRouter);

@@ -101,3 +101,16 @@ exports.GetIngredient=async function (req, res, next){
         return next(error);
       }
 }
+// get danh sách nguyên liệu của một brand
+exports.GetIngredientsByBrandID=async function (req, res, next){
+    try {
+        const brandID = req.user.brandID;
+        if(!brandID){
+            throw ApiError.ValidationError("Missing required field: brandID");
+        }
+        const getIngredientsByBrandID = await IngredientsRepository.getIngredientsByBrandID(brandID);
+        return res.json(ApiSuccess.getSelect("Ingredients list", getIngredientsByBrandID));
+      } catch (error) {
+        return next(error);
+      }
+}

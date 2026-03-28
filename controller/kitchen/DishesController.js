@@ -7,6 +7,7 @@ const DailyRepository = require("../../repository/DailyRepository");
 const DailyService = require("../../services/DailyServices");
 const sequelize = require("../../config/connectData");
 const { log } = require("winston");
+const IngredientServices = require("../../services/IngredientServices");
 // tạo món ăn mới cho kitchen
 exports.CreateDishesForKitchen = async function (req, res, next) {
   const t = await sequelize.transaction();
@@ -67,6 +68,7 @@ exports.CreateDishesForKitchen = async function (req, res, next) {
 
 // tạo món ra
 exports.CreateDishesOutput = async function (req, res, next) {
+  const t = await sequelize.transaction();
   try {
     const data = req.body;
     const brandID = req.params.brandID;
@@ -95,12 +97,18 @@ exports.CreateDishesOutput = async function (req, res, next) {
     if (checkDishesOutput) {
       throw ApiError.Notification("Dish output already exists");
     }
+    // kiểm tra xem nguyên liệu có đủ để tạo món ăn mới không
+    const checkIngredient = await IngredientServices.CheckIngredientOutput(data.dishes_id, data.quantity_prepared);
     const priceDish = await DailyService.checkPriceDish(data.dishes_id);
     data.revenue_cost = priceDish * data.quantity_prepared;
     const createDishesOutput = await DailyRepository.CreateDishesOutput(
       data,
       TakeIDOperation,
+      { transaction: t },
     );
+    // khi tạo món ra mới thì cũng cần cập nhật lại số lượng nguyên liệu đã xuất đi khi tạo món ăn đó
+    const ingredient = await IngredientServices.HandleIngredientOutput(data.dishes_id, data.quantity_prepared, req.user?.userId, t);
+    await t.commit();
     return res.json(
       ApiSuccess.created(
         "Dish output created successfully",
@@ -108,6 +116,9 @@ exports.CreateDishesOutput = async function (req, res, next) {
       ),
     );
   } catch (error) {
+    if (!t.finished) {
+      await t.rollback();
+    }
     return next(error);
   }
 };
@@ -171,6 +182,7 @@ exports.UpdateDishesLeftoverOutput = async function (req, res, next) {
 
 // cập nhập số lượng món ra và tính toán lại revenue_cost
 exports.UpdateDishesOutput = async function (req, res, next) {
+  const t = await sequelize.transaction();
   try {
     const data = req.body;
     const DailyDetailID = req.params.DailyDetailID;
@@ -218,8 +230,10 @@ exports.UpdateDishesOutput = async function (req, res, next) {
     const updateDishesOutput = await DailyRepository.UpdateDishesOutput(
       data,
       DailyDetailID,
+      { transaction: t },
     );
-
+    const ingredient = await IngredientServices.HandleIngredientOutputWhenUpdateDish(dishOutput.dishes_id, dishOutput.quantity_prepared, quantityPrepared, req.user?.userId, t);
+    await t.commit();
     return res.json(
       ApiSuccess.updated(
         "Dish output updated successfully",
@@ -227,6 +241,9 @@ exports.UpdateDishesOutput = async function (req, res, next) {
       ),
     );
   } catch (error) {
+    if(!t.finished) {
+      await t.rollback();
+    }
     return next(error);
   }
 };

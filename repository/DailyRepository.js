@@ -23,16 +23,16 @@ class DailyRepository {
         return await DailyDetailModel.findByPk(id);
     }
     // tạo daily_detail
-    async CreateDishesOutput(data, dailyID){
-        return await DailyDetailModel.create({ daily_id: dailyID, dishes_id: data.dishes_id, quantity_prepared: data.quantity_prepared, revenue_cost: data.revenue_cost });
+    async CreateDishesOutput(data, dailyID, option = {}) {
+        return await DailyDetailModel.create({ daily_id: dailyID, dishes_id: data.dishes_id, quantity_prepared: data.quantity_prepared, revenue_cost: data.revenue_cost }, {...option});
     }
     // cập nhập món dư
     async UpdateDishesLeftoverOutput(data, DailyDetailID){
         return await DailyDetailModel.update({ quantity_wasted: data.quantity_wasted, waste_cost: data.wasted_cost, revenue_cost: data.revenue_cost }, { where: { id: DailyDetailID } });
     }
     // cập nhập món ra khi có món dư
-    async UpdateDishesOutput(data, DailyDetailID){
-        return await DailyDetailModel.update({ quantity_prepared: data.quantity_prepared, revenue_cost: data.revenue_cost }, { where: { id: DailyDetailID } });
+    async UpdateDishesOutput(data, DailyDetailID, option = {}) {
+        return await DailyDetailModel.update({ quantity_prepared: data.quantity_prepared, revenue_cost: data.revenue_cost }, { where: { id: DailyDetailID }, ...option });
     }
     // lấy danh sách món ra theo ngày
     async GetDishesOutputByDate(brandID){
@@ -55,6 +55,15 @@ class DailyRepository {
     // kiểm tra xem món ăn đó đã được tạo món ra trong ngày chưa, nếu có rồi thì không được tạo nữa
     async CheckDishesOutputByDishID(dishes_id, dailyID){
         return await DailyDetailModel.findOne({ where: { dishes_id: dishes_id, daily_id: dailyID } });
+    }
+    // cập nhập số lượng khách hàng trong ngày
+    async UpdateCustomerCount(brandID, customer_count){
+        const today = new Date().toISOString().split('T')[0];
+        const operation = await DailyOperationModel.findOne({ where: { operation_date: today, brand_id: brandID } });
+        if (!operation) {
+            throw new Error("Daily operation not found for today");
+        }
+        return await DailyOperationModel.update({ customer_count: customer_count }, { where: { id: operation.id } });
     }
 }
 

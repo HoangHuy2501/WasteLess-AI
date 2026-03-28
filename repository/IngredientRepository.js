@@ -15,6 +15,13 @@ class IngredientRepository {
       { ...option },
     );
   }
+  // ghi lại lịch sử xuất nguyên liệu khi tạo món ăn mới
+  async IngredientTransactionOutput(data, userID,type, option = {}) {
+    return await IngredientStockTransactionModel.create(
+      { ...data, user_id: userID, type: type },
+      { ...option },
+    );
+  }
   // cập nhật số lượng nguyên liệu
   async updateIngredientStock(ingredientID, quantity, option = {}) {
     await IngredientModel.update(
@@ -39,6 +46,21 @@ class IngredientRepository {
             attributes: ['id', 'name']
         }]
     });
+  }
+  // get nguyên liệu theo id
+  async GetIngredientByID(id) {
+    return await IngredientModel.findByPk(id);
+  }
+  // câp nhật số lượng tồn kho của nguyên liệu
+  async updateIngredientStockWhenOutputDish(ingredientID, quantity, option = {}) {
+    return await IngredientModel.update({ current_stock: sequelize.literal(`current_stock - ${quantity}`) }, { where: { id: ingredientID }, ...option });
+  }
+  async updateIngredientStockWhenOutputDishUpdate(ingredientID, quantity, option = {}) {
+    return await IngredientModel.update({ current_stock: quantity }, { where: { id: ingredientID }, ...option });
+  }
+  // get tất cả nguyên liệu của một thương hiệu
+  async getIngredientsByBrandID(brandID) {
+    return await IngredientModel.findAll({ where: { brand_id: brandID } });
   }
 }
 module.exports = new IngredientRepository();
