@@ -86,6 +86,15 @@ exports.CreateDishesOutput = async function (req, res, next) {
       );
     }
     await CheckServices.checkDish(data.dishes_id);
+    // kiểm tra món ăn đó đã được tạo món ra trong ngày chưa, nếu có rồi thì không được tạo nữa
+    const checkDishesOutput =
+      await DailyRepository.CheckDishesOutputByDishID(
+        data.dishes_id,
+        TakeIDOperation,
+      );
+    if (checkDishesOutput) {
+      throw ApiError.Notification("Dish output already exists");
+    }
     const priceDish = await DailyService.checkPriceDish(data.dishes_id);
     data.revenue_cost = priceDish * data.quantity_prepared;
     const createDishesOutput = await DailyRepository.CreateDishesOutput(

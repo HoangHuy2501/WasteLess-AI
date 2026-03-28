@@ -42,7 +42,7 @@ class DailyRepository {
             return [];
         }
         return await DailyDetailModel.findAll({
-            attributes: ['id', 'quantity_prepared', 'quantity_wasted'],
+            attributes: ['id', 'quantity_prepared', 'quantity_wasted', 'revenue_cost', 'waste_cost'],
              where: { daily_id: operation.id },
                 include: [
                     {
@@ -50,8 +50,11 @@ class DailyRepository {
                         attributes: ['name']
                     }
                 ]
-            
             });
+    }
+    // kiểm tra xem món ăn đó đã được tạo món ra trong ngày chưa, nếu có rồi thì không được tạo nữa
+    async CheckDishesOutputByDishID(dishes_id, dailyID){
+        return await DailyDetailModel.findOne({ where: { dishes_id: dishes_id, daily_id: dailyID } });
     }
 }
 
