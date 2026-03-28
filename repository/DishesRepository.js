@@ -1,4 +1,4 @@
-const {DishModel, DishRecipeModel} = require("../models/index");
+const {DishModel, DishRecipeModel, DishCategoryModel} = require("../models/index");
 
 
 class DishesRepository {
@@ -35,10 +35,25 @@ class DishesRepository {
             throw error;
         }
     }
+    // lấy tất cả dish_recipes theo status true
+    async GetAllDishesTrue(brandID) {
+        try {            
+            const dishes = await DishModel.findAll({
+                 where: { status: true, brand_id: brandID },
+                    include: [{
+                      model:   DishCategoryModel,
+                      attributes: ['name']
+                    }]
+                });
+            return dishes;
+        } catch (error) {
+            throw error;
+        }
+    }
     // lấy tất cả dish_recipes theo status false
-    async GetAllDishesFalse() {
+    async GetAllDishesFalse(brandID) {
         try {
-            const dishes = await DishModel.findAll({ where: { status: false } });
+            const dishes = await DishModel.findAll({ where: { status: false, brand_id: brandID } });
             return dishes;
         } catch (error) {
             throw error;

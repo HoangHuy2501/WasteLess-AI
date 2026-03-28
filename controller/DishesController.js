@@ -84,7 +84,12 @@ exports.DeleteDishes = async function (req, res, next) {
 // lấy danh sách món ăn chờ
 exports.GetAllDishesFalse = async function (req, res, next) {
     try {
-        const getAllDishes = await DishesRepository.GetAllDishesFalse();
+        const BrandID = req.user.brandID;
+        if(!BrandID){
+            throw ApiError.Unauthorized("Brand ID is required");
+        }
+        await CheckServices.checkBrand(BrandID);
+        const getAllDishes = await DishesRepository.GetAllDishesFalse(BrandID);
         return res.json(ApiSuccess.getSelect("Dishes list", getAllDishes));
     } catch (error) {
         return next(error);
@@ -101,3 +106,17 @@ exports.ApproveDishes = async function (req, res, next) {
         return next(error);
     }
 };
+// danh sách món ăn đã được duyệt
+exports.GetAllDishesTrue = async function (req, res, next) {
+    try {
+        const BrandID = req.user.brandID;
+        if(!BrandID){
+            throw ApiError.Unauthorized("Brand ID is required");
+        }
+        await CheckServices.checkBrand(BrandID);
+        const getAllDishes = await DishesRepository.GetAllDishesTrue(BrandID);
+        return res.json(ApiSuccess.getSelect("Dishes list", getAllDishes));
+    } catch (error) {
+        return next(error);
+    }
+}
