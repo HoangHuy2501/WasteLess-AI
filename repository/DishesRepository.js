@@ -35,7 +35,7 @@ class DishesRepository {
             throw error;
         }
     }
-    // lấy tất cả dish_recipes theo status true
+    // lấy tất cả món ăn theo status true
     async GetAllDishesTrue(brandID) {
         try {            
             const dishes = await DishModel.findAll({
@@ -50,7 +50,18 @@ class DishesRepository {
             throw error;
         }
     }
-    // lấy tất cả dish_recipes theo status false
+    async GetAllDishesTrueAI(brandID) {
+        try {            
+            const dishes = await DishModel.findAll({
+                 where: { status: true, brand_id: brandID },
+                attributes: ['id', 'name']
+                });
+            return dishes;
+        } catch (error) {
+            throw error;
+        }
+    }
+    // lấy tất cả món ăn theo status false
     async GetAllDishesFalse(brandID) {
         try {
             const dishes = await DishModel.findAll({ where: { status: false, brand_id: brandID } });

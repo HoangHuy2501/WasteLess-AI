@@ -14,6 +14,12 @@ const BrandModel = sequelize.define('brands', {
   address: {
     type: DataTypes.TEXT
   },
+  rolebrand:{
+    type: DataTypes.TEXT,
+  },
+  province: {
+    type: DataTypes.TEXT
+  },
   status: {
     type: DataTypes.BOOLEAN,
     defaultValue: true

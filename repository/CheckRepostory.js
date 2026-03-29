@@ -13,7 +13,7 @@ class CheckRepository {
     }
     // gọi hết id của brand
     async AllBrand() {
-        return await BrandModel.findAll({attributes: ['id'], where: {status: true}});
+        return await BrandModel.findAll({where: {status: true}});
     }
     // check brand
     async checkBrand(id) {

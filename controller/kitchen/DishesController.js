@@ -72,13 +72,13 @@ exports.CreateDishesOutput = async function (req, res, next) {
   try {
     const data = req.body;
     const brandID = req.params.brandID;
-    console.log("brand",brandID);
+    console.log("brand", brandID);
     if (!brandID) {
       throw ApiError.ValidationError("Missing required field brandID");
     }
     // tìm kiếm ngày hiện tại lấy id ở operation_daily
     const TakeIDOperation = await DailyRepository.TakeIDOperation(brandID);
-    console.log("take",TakeIDOperation);
+    console.log("take", TakeIDOperation);
     if (!TakeIDOperation) {
       throw ApiError.ValidationError("NotFound operation_daily for today");
     }
@@ -89,16 +89,18 @@ exports.CreateDishesOutput = async function (req, res, next) {
     }
     await CheckServices.checkDish(data.dishes_id);
     // kiểm tra món ăn đó đã được tạo món ra trong ngày chưa, nếu có rồi thì không được tạo nữa
-    const checkDishesOutput =
-      await DailyRepository.CheckDishesOutputByDishID(
-        data.dishes_id,
-        TakeIDOperation,
-      );
+    const checkDishesOutput = await DailyRepository.CheckDishesOutputByDishID(
+      data.dishes_id,
+      TakeIDOperation,
+    );
     if (checkDishesOutput) {
       throw ApiError.Notification("Dish output already exists");
     }
     // kiểm tra xem nguyên liệu có đủ để tạo món ăn mới không
-    const checkIngredient = await IngredientServices.CheckIngredientOutput(data.dishes_id, data.quantity_prepared);
+    const checkIngredient = await IngredientServices.CheckIngredientOutput(
+      data.dishes_id,
+      data.quantity_prepared,
+    );
     const priceDish = await DailyService.checkPriceDish(data.dishes_id);
     data.revenue_cost = priceDish * data.quantity_prepared;
     const createDishesOutput = await DailyRepository.CreateDishesOutput(
@@ -107,7 +109,12 @@ exports.CreateDishesOutput = async function (req, res, next) {
       { transaction: t },
     );
     // khi tạo món ra mới thì cũng cần cập nhật lại số lượng nguyên liệu đã xuất đi khi tạo món ăn đó
-    const ingredient = await IngredientServices.HandleIngredientOutput(data.dishes_id, data.quantity_prepared, req.user?.userId, t);
+    const ingredient = await IngredientServices.HandleIngredientOutput(
+      data.dishes_id,
+      data.quantity_prepared,
+      req.user?.userId,
+      t,
+    );
     await t.commit();
     return res.json(
       ApiSuccess.created(
@@ -209,7 +216,11 @@ exports.UpdateDishesOutput = async function (req, res, next) {
         "NotFound dish output with id: " + DailyDetailID,
       );
     }
-
+    if(Number(dishOutput.quantity_wasted>0)) {
+      throw ApiError.ValidationError(
+        "Cannot update quantity_prepared when quantity_wasted is already set. Please update quantity_wasted",
+      );
+    }
     const quantityWasted = Number(dishOutput.quantity_wasted || 0);
 
     if (quantityPrepared < quantityWasted) {
@@ -232,7 +243,15 @@ exports.UpdateDishesOutput = async function (req, res, next) {
       DailyDetailID,
       { transaction: t },
     );
-    const ingredient = await IngredientServices.HandleIngredientOutputWhenUpdateDish(dishOutput.dishes_id, dishOutput.quantity_prepared, quantityPrepared, req.user?.userId, t);
+    const oldQuantityPrepared = Number(dishOutput.quantity_prepared || 0);
+    const ingredient =
+      await IngredientServices.HandleIngredientOutputWhenUpdateDish(
+        dishOutput.dishes_id,
+        oldQuantityPrepared,
+        quantityPrepared,
+        req.user?.userId,
+        t,
+      );
     await t.commit();
     return res.json(
       ApiSuccess.updated(
@@ -241,7 +260,7 @@ exports.UpdateDishesOutput = async function (req, res, next) {
       ),
     );
   } catch (error) {
-    if(!t.finished) {
+    if (!t.finished) {
       await t.rollback();
     }
     return next(error);

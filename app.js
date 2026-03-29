@@ -20,7 +20,7 @@ var KitchenRouter= require('./routes/Kitchen/DishRoutes');
 var categoryRouter= require('./routes/categoryRoutes');
 var DashboardRouter= require('./routes/dashboardRoutes');
 // cron
-const { OperationDaily } = require('./routes/cron');
+const { OperationDaily, CallAIEveryDays } = require('./routes/cron');
 //test
 var AuthController = require('./controller/AuthController');
 var app = express();
@@ -48,6 +48,7 @@ app.get('/api/ping', (req, res) => {
   res.send('Server is alive ✅');
 });
 OperationDaily();
+// CallAIEveryDays();
 
 app.use('/api/auth', authRouter);
 app.use(authenticate);

@@ -1,6 +1,7 @@
 
 const { DailyOperationModel, DailyDetailModel, DishModel } = require("../models/index");
 const sequelize  = require("../config/connectData");
+const { Op, fn, col } = require("sequelize");
 class DailyRepository {
     async DailyOperation(brandID) {
         return await DailyOperationModel.create({ brand_id: brandID, operation_date: sequelize.literal('CURRENT_DATE'), customer_count: 0 });
@@ -64,6 +65,87 @@ class DailyRepository {
             throw new Error("Daily operation not found for today");
         }
         return await DailyOperationModel.update({ customer_count: customer_count }, { where: { id: operation.id } });
+    }
+    // lấy dữ liệu lịch sử 7 ngày gần nhất
+    async GetHistory7NextDays(brandID) {
+        const today = new Date();
+        const sevenDaysAgo = new Date(today);
+        sevenDaysAgo.setDate(today.getDate() - 6);
+
+        const startDate = sevenDaysAgo.toISOString().split('T')[0];
+        const endDate = today.toISOString().split('T')[0];
+
+        // 1. Trung bình số khách trong 7 ngày
+        const avgCustomer = await DailyOperationModel.findOne({
+            where: {
+                brand_id: brandID,
+                operation_date: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
+            attributes: [
+                [fn('AVG', col('customer_count')), 'avg_customer_count']
+            ],
+            raw: true
+        });
+
+        // 2. Trung bình các field của DailyDetail trong 7 ngày
+        const avgDetail = await DailyDetailModel.findOne({
+            include: [
+                {
+                    model: DailyOperationModel,
+                    attributes: [],
+                    where: {
+                        brand_id: brandID,
+                        operation_date: {
+                            [Op.between]: [startDate, endDate]
+                        }
+                    }
+                }
+            ],
+            attributes: [
+                [fn('AVG', col('quantity_prepared')), 'avg_quantity_prepared'],
+                [fn('AVG', col('quantity_wasted')), 'avg_quantity_wasted']
+            ],
+            raw: true
+        });
+
+        return {
+            avg_customer_count: Number(avgCustomer?.avg_customer_count || 0),
+            avg_quantity_prepared: Number(avgDetail?.avg_quantity_prepared || 0),
+            avg_quantity_wasted: Number(avgDetail?.avg_quantity_wasted || 0)
+        };
+    }
+    // lấy dữ liệu chi tiết các ngày gần nhất
+    async GetDetailHistory3NextDays(brandID) {
+        const today = new Date();
+        const threeDaysAgo = new Date(today);
+        threeDaysAgo.setDate(today.getDate() - 2);
+
+        const startDate = threeDaysAgo.toISOString().split('T')[0];
+        const endDate = today.toISOString().split('T')[0];
+
+        const result = await DailyDetailModel.findAll({
+            attributes: ['quantity_prepared', 'quantity_wasted', 'waste_cost'],
+            include: [
+                {
+                    model: DailyOperationModel,
+                    attributes: ["operation_date"],
+                    where: {
+                        brand_id: brandID,
+                        operation_date: {
+                            [Op.between]: [startDate, endDate]
+                        }
+                    }
+                },{
+                    model: DishModel,
+                    attributes: ['name']
+                }
+            ],
+            raw: true
+        });
+
+        return result;
     }
 }
 
