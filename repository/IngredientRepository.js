@@ -60,7 +60,11 @@ class IngredientRepository {
   }
   // get tất cả nguyên liệu của một thương hiệu
   async getIngredientsByBrandID(brandID) {
-    return await IngredientModel.findAll({ where: { brand_id: brandID } });
+    return await IngredientModel.findAll({ where: { brand_id: brandID }, include: [{
+        model: IngredientCategoryModel,
+        attributes: ['id', 'name']
+    }] 
+  });
   }
 }
 module.exports = new IngredientRepository();

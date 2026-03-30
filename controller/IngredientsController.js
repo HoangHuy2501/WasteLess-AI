@@ -11,8 +11,8 @@ exports.CreateIngredient=async function (req, res, next) {
         if(!brandID){
             throw ApiError.ValidationError("Missing required field: brandID");
         }
-        if(!data.name || !data.unit || !data.ingredient_category_id || !data.minimum_stock){
-            throw ApiError.ValidationError("Missing required fields: name, unit, ingredient_category_id, minimum_stock");
+        if(!data.name || !data.unit || !data.ingredient_category_id || !data.minimum_stock || Number.isNaN(data.minimum_stock) || !data.current_stock || Number.isNaN(data.current_stock)){
+            throw ApiError.ValidationError("Missing required fields: name, unit, ingredient_category_id, minimum_stock, current_stock");
         }
         // Check if the ingredient category exists
         await CheckServices.checkCategoryIngredient(data.ingredient_category_id);
@@ -34,7 +34,7 @@ exports.AddIngredientTransaction=async function (req, res, next){
         if(!userID){
             throw ApiError.ValidationError("Missing required field: userID");
         }
-        if(!data.ingredient_id || !data.quantity){
+        if(!data.ingredient_id || !data.quantity || Number.isNaN(data.quantity)){
             throw ApiError.ValidationError("Missing required fields: ingredientID, quantity");
         }
         // có 3 loại transaction: nhập kho (extra), xuất kho (sell), điều chỉnh tồn kho(adjustment)
@@ -63,8 +63,11 @@ exports.UpdateIngredient=async function (req, res, next){
         if(!ingredientID){
             throw ApiError.ValidationError("Missing required field: ingredientID");
         }
-        if(!data.name || !data.unit || !data.IngredientCategoryID || !data.minimum_stock){
+        if(!data.name || !data.unit || !data.IngredientCategoryID || !data.minimum_stock || Number.isNaN(data.minimum_stock)){
             throw ApiError.ValidationError("Missing required fields: name, unit, IngredientCategoryID, minimum_stock");
+        }
+        if(data.current_stock && Number(data.current_stock)){
+            throw ApiError.ValidationError("Invalid value for field: current_stock cannot be updated through this endpoint");
         }
         // Check if the ingredient category exists 
         await CheckServices.checkCategoryIngredient(data.IngredientCategoryID);
