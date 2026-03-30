@@ -97,6 +97,15 @@ class DishesRepository {
             throw error;
         }
     }
+    // get danh sách món ăn cho kitchen staff
+    async GetAllDishesTrueKitchen(brandID) {
+        try {
+            const dishes = await DishModel.findAll({ where: { status: true, brand_id: brandID }, attributes: ['id', 'name'] });
+            return dishes;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = new DishesRepository();

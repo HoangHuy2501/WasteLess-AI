@@ -284,3 +284,17 @@ exports.GetDishesOutputByDate = async function (req, res, next) {
     return next(error);
   }
 };
+// get danh sách món ăn true dành cho kitchen
+exports.GetAllDishesTrueKitchen = async function (req, res, next) {
+  try {
+    const BrandID = req.user.brandID;
+    if (!BrandID) {
+      throw ApiError.Unauthorized("Brand ID is required");
+    }
+    await CheckServices.checkBrand(BrandID);
+    const getAllDishes = await DishesRepository.GetAllDishesTrueKitchen(BrandID);
+    return res.json(ApiSuccess.getSelect("Dishes list", getAllDishes));
+  } catch (error) {
+    return next(error);
+  }
+}
