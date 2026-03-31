@@ -283,10 +283,10 @@ class DailyRepository {
         },
       ],
       group: [
-      col("daily_operations.id"),
-      col("daily_operations.operation_date"),
-      col("daily_operations.customer_count"),
-    ],
+        col("daily_operations.id"),
+        col("daily_operations.operation_date"),
+        col("daily_operations.customer_count"),
+      ],
       raw: true,
     });
 
@@ -305,22 +305,123 @@ class DailyRepository {
         "id",
         "quantity_prepared",
         "quantity_wasted",
-        [sequelize.literal("(quantity_wasted / NULLIF(quantity_prepared, 0)) * 100"), "waste_percentage"],
+        [
+          sequelize.literal(
+            "(quantity_wasted / NULLIF(quantity_prepared, 0)) * 100",
+          ),
+          "waste_percentage",
+        ],
       ],
       include: [
         {
           model: DailyOperationModel,
           attributes: ["operation_date"],
           where: {
-                brand_id: brandID,
-                operation_date: {
-                [Op.between]: [startDate, endDate],
-                },
-            }
-        },{
+            brand_id: brandID,
+            operation_date: {
+              [Op.between]: [startDate, endDate],
+            },
+          },
+        },
+        {
           model: DishModel,
           attributes: ["name"],
-        }
+        },
+      ],
+      raw: true,
+    });
+    return result;
+  }
+  // tổng số lảng phí mon ăn trong 1 tháng (nếu ko truyền month thì lấy tháng hiện tại)
+async SumWasteByMonth(brandID, month = null) {
+  const now = new Date();
+  let year = now.getFullYear();
+  let monthIndex = now.getMonth(); // 0-11
+
+  if (month !== null) {
+    if (typeof month === "object") {
+      year = month.year ?? year;
+      monthIndex = month.month ?? monthIndex;
+    } else if (typeof month === "number") {
+      monthIndex = month;
+    }
+  }
+
+  const firstDayOfMonth = new Date(year, monthIndex, 1);
+  const firstDayOfNextMonth = new Date(year, monthIndex + 1, 1);
+
+  const formatDate = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  const result = await DailyDetailModel.findOne({
+    attributes: [
+      [fn("COALESCE", fn("SUM", col("quantity_wasted")), 0), "total_waste"],
+    ],
+    include: [
+      {
+        model: DailyOperationModel,
+        attributes: [], // rất quan trọng
+        required: true,
+        where: {
+          brand_id: brandID,
+          operation_date: {
+            [Op.gte]: formatDate(firstDayOfMonth),
+            [Op.lt]: formatDate(firstDayOfNextMonth),
+          },
+        },
+      },
+    ],
+    raw: true,
+  });
+  return result;
+}
+  // danh sách lãng phí món ăn theo nguyên liệu
+  async ListWasteByIngredient(brandID) {
+    const today = new Date();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDayOfMonth = new Date(
+      today.getFullYear(),
+      today.getMonth() + 1,
+      0,
+    );
+    const startDate = firstDayOfMonth.toISOString().split("T")[0];
+    const endDate = lastDayOfMonth.toISOString().split("T")[0];
+    const result = await DailyDetailModel.findAll({
+      attributes: [
+        "id",
+        "quantity_prepared",
+        "quantity_wasted",
+        "waste_cost",
+        [
+          sequelize.literal(
+            "(quantity_wasted / NULLIF(quantity_prepared, 0)) * 100",
+          ),
+          "waste_percentage",
+        ],
+        [
+          sequelize.literal("quantity_prepared - quantity_wasted"),
+          "quantity_used",
+        ],
+      ],
+      include: [
+        {
+          model: DailyOperationModel,
+          attributes: ["operation_date"],
+          where: {
+            brand_id: brandID,
+            operation_date: {
+              [Op.between]: [startDate, endDate],
+            },
+          },
+        },
+        {
+          model: DishModel,
+          attributes: ["name"],
+        },
       ],
       raw: true,
     });
