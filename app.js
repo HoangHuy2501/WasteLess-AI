@@ -19,6 +19,7 @@ var dishRouter = require('./routes/dishRoutes');
 var KitchenRouter= require('./routes/Kitchen/DishRoutes');
 var categoryRouter= require('./routes/categoryRoutes');
 var DashboardRouter= require('./routes/dashboardRoutes');
+var ConsumptionRouter = require('./routes/ConsumptionRoutes');
 // cron
 const { OperationDaily, CallAIEveryDays } = require('./routes/cron');
 //test
@@ -60,6 +61,7 @@ app.use('/api/ingredients', ingredientRouter);
 app.use('/api/dishes', dishRouter);
 app.use('/api/kitchen', KitchenRouter);
 app.use('/api', categoryRouter);
+app.use('/api/consumption', ConsumptionRouter);
 app.use(successHandler);
 app.use(errorsHandler);
 // catch 404 and forward to error handler

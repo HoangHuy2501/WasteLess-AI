@@ -106,6 +106,15 @@ class DishesRepository {
             throw error;
         }
     }
+    // tổng món ăn true
+    async SumDishesOutputByDate(brandID) {
+        try {
+            const dishes = await DishModel.count({ where: { status: true, brand_id: brandID } });
+            return dishes;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = new DishesRepository();
