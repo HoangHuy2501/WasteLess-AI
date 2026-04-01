@@ -420,7 +420,7 @@ async SumWasteByMonth(brandID, month = null) {
         },
         {
           model: DishModel,
-          attributes: ["name"],
+          attributes: ["id","name"],
         },
       ],
       raw: true,

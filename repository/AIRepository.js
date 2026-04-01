@@ -124,6 +124,7 @@ class AIRepository {
           ],
         },
       ],
+      raw: true,
     });
     return result;
   } catch (error) {
