@@ -1,6 +1,7 @@
 const ApiError = require("../utils/ApiError");
 const ApiSuccess = require("../utils/ApiSuccess");
 const CheckServices = require("../services/CheckServices");
+const DailyServices = require("../services/DailyServices");
 const DashboardRepository = require("../repository/DashboardRepository");
 
 exports.GetReportDishes = async function (req, res, next) {
@@ -30,7 +31,10 @@ exports.GetReportRevenue = async function (req, res, next) {
         if (!checkBrand) {
             throw ApiError.ValidationError("Brand not found with id: " + brandID);
         }
-        const reportRevenue = await DashboardRepository.getPayDish1Month(brandID);
+        // Get current month date range using checkMonth for consistency
+        const monthRange = await DailyServices.checkMonth();
+        
+        const reportRevenue = await DashboardRepository.getPayDish1Month(brandID, monthRange);
         return res.json(ApiSuccess.getSelect("Report revenue", reportRevenue.total_revenue));
     } catch (error) {
         return next(error);

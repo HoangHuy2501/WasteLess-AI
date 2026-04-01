@@ -1,8 +1,8 @@
 const ApiError = require("../utils/ApiError");
 const ApiSuccess = require("../utils/ApiSuccess");
+const DailyServices = require("../services/DailyServices");
 const DailyRepository = require("../repository/DailyRepository");
 const AIRepository = require("../repository/AIRepository");
-const { log } = require("winston");
 //tổng món ăn lãng phí trong 1 tháng
 exports.SumWasteByMonth = async (req, res, next) => {
   try {
@@ -57,10 +57,10 @@ exports.SumWasteByMonthCompare = async (req, res, next) => {
 exports.ListWasteByIngredient = async (req, res, next) => {
   try {
     const brandID = req.user.brandID;
-
+    const month = await DailyServices.checkMonth();
     const resultAI =
       await AIRepository.getAi_Analysis_Waste_By_BrandID(brandID);
-    const resultDaily = await DailyRepository.ListWasteByIngredient(brandID);
+    const resultDaily = await DailyRepository.ListWasteByIngredient(brandID,month);
 
     console.log("ai", JSON.stringify(resultAI || [], null, 2));
     console.log("daily", JSON.stringify(resultDaily || [], null, 2));

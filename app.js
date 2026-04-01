@@ -21,6 +21,7 @@ var categoryRouter= require('./routes/categoryRoutes');
 var DashboardRouter= require('./routes/dashboardRoutes');
 var ConsumptionRouter = require('./routes/ConsumptionRoutes');
 var HistoryWasteRouter= require('./routes/HistoryWasteRoutes');
+var RevenueRouter = require('./routes/RevenueRoutes');
 // cron
 const { OperationDaily, CallAIEveryDays } = require('./routes/cron');
 //test
@@ -64,6 +65,7 @@ app.use('/api/kitchen', KitchenRouter);
 app.use('/api', categoryRouter);
 app.use('/api/consumption', ConsumptionRouter);
 app.use('/api/history', HistoryWasteRouter);
+app.use('/api/revenue', RevenueRouter);
 app.use(successHandler);
 app.use(errorsHandler);
 // catch 404 and forward to error handler

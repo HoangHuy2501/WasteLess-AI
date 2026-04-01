@@ -17,12 +17,7 @@ class DashboardRepository {
     // tổng số món ăn đã bán được trong tháng hiện tại
 
 
-    async getPayDish1Month(brandID) {
-    const now = new Date();
-
-    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
+    async getPayDish1Month(brandID,month) {
     const result = await DailyDetailModel.findOne({
         attributes: [
             [fn('SUM', col('revenue_cost')), 'total_revenue'],
@@ -38,8 +33,7 @@ class DashboardRepository {
                 where: {
                     brand_id: brandID,
                     operation_date: {
-                        [Op.gte]: startDate,
-                        [Op.lt]: endDate
+                        [Op.between]: [month.startDate,month.endDate]
                     }
                 }
             }

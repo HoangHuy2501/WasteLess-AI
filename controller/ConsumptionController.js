@@ -1,5 +1,6 @@
 const ApiError = require("../utils/ApiError");
 const ApiSuccess = require("../utils/ApiSuccess");
+const DailyServices = require("../services/DailyServices");
 const DailyRepository = require("../repository/DailyRepository");
 const DishesRepository = require("../repository/DishesRepository");
 
@@ -17,7 +18,8 @@ exports.sumCustomerAsLastMonth = async (req, res, next) => {
 exports.ListCustomerInMonth = async (req, res, next) => {
     try {
         const brandID = req.user.brandID;
-        const result = await DailyRepository.GetCustomerCountAndRevenueByMonth(brandID);
+        const month = await DailyServices.checkMonth();
+        const result = await DailyRepository.GetCustomerCountAndRevenueByMonth(brandID, month);
         return res.json(ApiSuccess.getSelect("Customer count", result));
     } catch (error) {
         return next(error);

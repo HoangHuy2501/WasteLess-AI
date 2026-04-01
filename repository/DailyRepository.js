@@ -150,7 +150,6 @@ class DailyRepository {
       ],
       raw: true,
     });
-
     return {
       avg_customer_count: Number(avgCustomer?.avg_customer_count || 0),
       avg_quantity_prepared: Number(avgDetail?.avg_quantity_prepared || 0),
@@ -191,77 +190,79 @@ class DailyRepository {
   }
   // lấy dữ liệu tổng số khách trong 1 tháng và so phần trăm với tháng trước
   async GetCustomerCountByMonth(brandID) {
-    const today = new Date();
-    // Current month
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDayOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0,
-    );
-    const currentStartDate = firstDayOfMonth.toISOString().split("T")[0];
-    const currentEndDate = lastDayOfMonth.toISOString().split("T")[0];
-    // Previous month
-    const firstDayPrevMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() - 1,
-      1,
-    );
-    const lastDayPrevMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-    const prevStartDate = firstDayPrevMonth.toISOString().split("T")[0];
-    const prevEndDate = lastDayPrevMonth.toISOString().split("T")[0];
-    // Get total customer count for current month
-    const currentMonthResult = await DailyOperationModel.findOne({
-      attributes: [[fn("SUM", col("customer_count")), "total_customers"]],
-      where: {
-        brand_id: brandID,
-        operation_date: {
-          [Op.between]: [currentStartDate, currentEndDate],
-        },
+  const today = new Date();
+
+  const formatDateLocal = (date) => {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  };
+
+  // Current month
+  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+  const currentStartDate = formatDateLocal(firstDayOfMonth);
+  const currentEndDate = formatDateLocal(lastDayOfMonth);
+
+  // Previous month
+  const firstDayPrevMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() - 1,
+    1
+  );
+  const lastDayPrevMonth = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    0
+  );
+
+  const prevStartDate = formatDateLocal(firstDayPrevMonth);
+  const prevEndDate = formatDateLocal(lastDayPrevMonth);
+
+  // Get total customer count for current month
+  const currentMonthResult = await DailyOperationModel.findOne({
+    attributes: [[fn("SUM", col("customer_count")), "total_customers"]],
+    where: {
+      brand_id: brandID,
+      operation_date: {
+        [Op.between]: [currentStartDate, currentEndDate],
       },
-      raw: true,
-    });
-    // Get total customer count for previous month
-    const prevMonthResult = await DailyOperationModel.findOne({
-      attributes: [[fn("SUM", col("customer_count")), "total_customers"]],
-      where: {
-        brand_id: brandID,
-        operation_date: {
-          [Op.between]: [prevStartDate, prevEndDate],
-        },
+    },
+    raw: true,
+  });
+
+  // Get total customer count for previous month
+  const prevMonthResult = await DailyOperationModel.findOne({
+    attributes: [[fn("SUM", col("customer_count")), "total_customers"]],
+    where: {
+      brand_id: brandID,
+      operation_date: {
+        [Op.between]: [prevStartDate, prevEndDate],
       },
-      raw: true,
-    });
+    },
+    raw: true,
+  });
 
-    const currentTotal = Number(currentMonthResult?.total_customers || 0);
-    const prevTotal = Number(prevMonthResult?.total_customers || 0);
+  const currentTotal = Number(currentMonthResult?.total_customers || 0);
+  const prevTotal = Number(prevMonthResult?.total_customers || 0);
 
-    // Calculate percentage change
-    let percentageChange = 0;
-    if (prevTotal > 0) {
-      percentageChange = ((currentTotal - prevTotal) / prevTotal) * 100;
-    } else if (currentTotal > 0) {
-      percentageChange = 100;
-    }
-
-    return {
-      current_month_total: currentTotal,
-      previous_month_total: prevTotal,
-      percentage_change: Math.round(percentageChange * 100) / 100,
-    };
+  let percentageChange = 0;
+  if (prevTotal > 0) {
+    percentageChange = ((currentTotal - prevTotal) / prevTotal) * 100;
+  } else if (currentTotal > 0) {
+    percentageChange = 100;
   }
-  // danh sách số lượng khách trong 1 tháng có cả doanh thu
-  async GetCustomerCountAndRevenueByMonth(brandID) {
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDayOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0,
-    );
-    const startDate = firstDayOfMonth.toISOString().split("T")[0];
-    const endDate = lastDayOfMonth.toISOString().split("T")[0];
 
+  return {
+    current_month_total: currentTotal,
+    previous_month_total: prevTotal,
+    percentage_change: Math.round(percentageChange * 100) / 100,
+  };
+}
+  // danh sách số lượng khách trong 1 tháng có cả doanh thu
+  async GetCustomerCountAndRevenueByMonth(brandID, month) {
     const result = await DailyOperationModel.findAll({
       attributes: [
         "id",
@@ -272,7 +273,7 @@ class DailyRepository {
       where: {
         brand_id: brandID,
         operation_date: {
-          [Op.between]: [startDate, endDate],
+          [Op.between]: [month.startDate,month.endDate],
         },
       },
       include: [
@@ -380,16 +381,7 @@ async SumWasteByMonth(brandID, month = null) {
   return result;
 }
   // danh sách lãng phí món ăn theo nguyên liệu
-  async ListWasteByIngredient(brandID) {
-    const today = new Date();
-    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const lastDayOfMonth = new Date(
-      today.getFullYear(),
-      today.getMonth() + 1,
-      0,
-    );
-    const startDate = firstDayOfMonth.toISOString().split("T")[0];
-    const endDate = lastDayOfMonth.toISOString().split("T")[0];
+  async ListWasteByIngredient(brandID, month) {
     const result = await DailyDetailModel.findAll({
       attributes: [
         "id",
@@ -414,7 +406,7 @@ async SumWasteByMonth(brandID, month = null) {
           where: {
             brand_id: brandID,
             operation_date: {
-              [Op.between]: [startDate, endDate],
+              [Op.between]: [month.startDate, month.endDate],
             },
           },
         },
@@ -422,6 +414,84 @@ async SumWasteByMonth(brandID, month = null) {
           model: DishModel,
           attributes: ["id","name"],
         },
+      ],
+      raw: true,
+    });
+    return result;
+  }
+  // tổng doanh thu hôm qua
+  async SumRevenueYesterday(brandID) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    // format YYYY-MM-DD (local time, không bị lệch)
+            const formatDate = (date) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, "0");
+            const d = String(date.getDate()).padStart(2, "0");
+            return `${y}-${m}-${d}`;
+            };
+    const result = await DailyDetailModel.findOne({
+      attributes: [[fn("SUM", col("revenue_cost")), "total_revenue"]],
+      include: [
+        {
+          model: DailyOperationModel,
+          attributes: [],
+          required: true,
+          where: {
+            brand_id: brandID,
+            operation_date: formatDate(yesterday),
+          },
+        },
+      ],
+      raw: true,
+    });
+    return result;
+  }
+  //tổng doanh thu tháng
+  async SumRevenueByMonth(brandID,month) {
+    const result = await DailyDetailModel.findOne({
+      attributes: [[fn("SUM", col("revenue_cost")), "total_revenue"]],
+      include: [
+        {
+          model: DailyOperationModel,
+          attributes: [],
+          required: true,
+          where: {
+            brand_id: brandID,
+            operation_date: {
+              [Op.between]: [month.startDate,month.endDate],
+            },
+          },
+        },
+      ],
+      raw: true,
+    });
+    return result;
+  }
+  // chi tiết giao dịch tháng này
+  async TransactionByMonth(brandID,month) {
+    const result = await DailyDetailModel.findAll({
+      attributes: ["id","revenue_cost",
+        [
+          sequelize.literal("quantity_prepared - quantity_wasted"),
+          "quantity_used",
+        ],
+      ],
+      include: [
+        {
+          model: DailyOperationModel,
+          attributes: ["operation_date"],
+          required: true,
+          where: {
+            brand_id: brandID,
+            operation_date: {
+              [Op.between]: [month.startDate, month.endDate],
+            },
+          },
+        },{
+          model: DishModel,
+          attributes: ["name"],
+        }
       ],
       raw: true,
     });
