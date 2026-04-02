@@ -13,7 +13,7 @@ exports.CreateDishesForKitchen = async function (req, res, next) {
   const t = await sequelize.transaction();
   try {
     const data = req.body;
-    const brandID = req.params.brandID;
+    const brandID = req.user.brandID;
     const userID = req.user?.userId;
     // console.log("data", data);
 
