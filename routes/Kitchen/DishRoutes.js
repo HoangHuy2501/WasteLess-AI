@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var DishesController = require('../../controller/kitchen/DishesController');
-const authorize = require('../middleware/authorize');
+const authorize = require('../../middleware/authorize');
 
 router.post('/create-dishes-new',authorize(["Kitchen"]), DishesController.CreateDishesForKitchen);
 router.post('/create-dishes-daily/:brandID', DishesController.CreateDishesOutput);
