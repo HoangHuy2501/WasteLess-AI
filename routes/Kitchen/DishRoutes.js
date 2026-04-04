@@ -10,4 +10,5 @@ router.put('/update-dishes-output/:DailyDetailID', DishesController.UpdateDishes
 router.get('/get-dishes-output/:brandID', DishesController.GetDishesOutputByDate);
 // danh sách món ăn cho kitchen staff
 router.get('/get-all-dishes', DishesController.GetAllDishesTrueKitchen);
+router.get('/get-all-dishes-false-by-kitchen', DishesController.GetListDishWaitByUser);
 module.exports = router;

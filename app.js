@@ -22,6 +22,7 @@ var DashboardRouter= require('./routes/dashboardRoutes');
 var ConsumptionRouter = require('./routes/ConsumptionRoutes');
 var HistoryWasteRouter= require('./routes/HistoryWasteRoutes');
 var RevenueRouter = require('./routes/RevenueRoutes');
+var DashboardKitchenRouter = require('./routes/Kitchen/DashboardRoutes');
 // cron
 const { OperationDaily, CallAIEveryDays } = require('./routes/cron');
 //test
@@ -59,6 +60,7 @@ app.use(authenticate);
 //....
 app.use('/api/users', usersRouter);
 app.use('/api/dashboard', DashboardRouter);
+app.use('/api/dashboard/kitchen', DashboardKitchenRouter);
 app.use('/api/ingredients', ingredientRouter);
 app.use('/api/dishes', dishRouter);
 app.use('/api/kitchen', KitchenRouter);

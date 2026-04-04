@@ -23,6 +23,7 @@ class CheckServices {
     async checkMailPass(email, password) {
         try {
             const user =  await AuthRepository.SelectMail(email);
+            await this.checkBrand(user.brand?.id);
             const check = await this.checkHash(password, user.password);
             if(!user || !check){
                 throw ApiError.Unauthorized("Invalid email or password");

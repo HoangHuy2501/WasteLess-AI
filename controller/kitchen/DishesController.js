@@ -298,3 +298,14 @@ exports.GetAllDishesTrueKitchen = async function (req, res, next) {
     return next(error);
   }
 }
+// danh sách món ăn đợi của kitchen
+exports.GetListDishWaitByUser = async function (req, res, next) {
+  try {
+    const brandID =req.user.brandID;
+    const userID = req.user.userId;
+    const dishesOutput = await DishesRepository.GetAllDishesFalseByUserID(userID, brandID);
+    return res.json(ApiSuccess.getSelect("Dishes Output list", dishesOutput));
+  } catch (error) {
+    return next(error);
+  }
+}

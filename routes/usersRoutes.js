@@ -9,7 +9,7 @@ router.put('/update-customer-count',authorize(["Manager"]), CustomerController.U
 /* GET users listing. */
 router.post('/register-kitchen/:id', authorize(["Manager", "Admin"]), UserController.RegisterKitchen);
 router.put('/update-kitchen/:id', UserController.UpdateKitchen);
-router.get('/info/:id', authorize(["Manager"]), UserController.GetInfoUser);
+router.get('/info/:id', UserController.GetInfoUser);
 router.put('/lock-kitchen/:id', authorize(["Manager", "Admin"]), UserController.LockKitchen);
 router.put('/unlock-kitchen/:id', authorize(["Manager", "Admin"]), UserController.UnlockKitchen);
 router.get('/get-kitchen-staff', authorize(["Manager"]), UserController.GetKitchenStaff);

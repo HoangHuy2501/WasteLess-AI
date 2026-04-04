@@ -497,6 +497,7 @@ async SumWasteByMonth(brandID, month = null) {
     });
     return result;
   }
+  //
 }
 
 module.exports = new DailyRepository();

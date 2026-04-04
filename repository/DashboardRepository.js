@@ -1,6 +1,7 @@
 
 const { DishModel, DailyOperationModel, DailyDetailModel, IngredientModel} = require('../models/index');
-    const { Op, fn, col } = require('sequelize');
+const sequelize = require('../config/connectData');
+const { Op, fn, col } = require('sequelize');
 class DashboardRepository {
 
     // tổng số lượng món ăn, tổng số đang phục vụ, tổng số đang đợi
@@ -69,7 +70,38 @@ class DashboardRepository {
         });
         return result;
     }
-
+    // báo cáo phần trăm lãng phí của ngày hôm qua
+    async getPayDishYesterday(brandID) {
+        const now = new Date();
+        // Đầu ngày hôm nay (00:00)
+        const startOfToday = new Date(now);
+        startOfToday.setHours(0, 0, 0, 0);
+        // Đầu ngày hôm qua
+        const startOfYesterday = new Date(startOfToday);
+        startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+        const result = await DailyDetailModel.findOne({
+            attributes: [
+                [fn('SUM', col('waste_cost')), 'total_waste_cost'],
+                [fn('SUM', col('quantity_prepared')), 'total_prepared'],
+                [fn('SUM', col('quantity_wasted')), 'total_wasted']
+            ],
+            include: [
+                {
+                    model: DailyOperationModel,
+                    attributes: [],
+                    where: {
+                        brand_id: brandID,
+                        operation_date: {
+                            [Op.gte]: startOfYesterday, // >= 00:00 hôm qua
+                            [Op.lt]: startOfToday       // < 00:00 hôm nay
+                        }
+                    }
+                }
+            ],
+            raw: true
+        });
+        return result;
+    }
     // thông báo nguyên liệu sắp hết
     async getLowStockIngredients(brandID) {
         const lowStockIngredients = await IngredientModel.findAll({
@@ -83,6 +115,107 @@ class DashboardRepository {
         });
         return lowStockIngredients;
     }
+    // lấy món dư nhiều nhất ngày hôm qua của 1 ngày
+    async getPayDishYesterdayByDate(brandID) {
+        const now = new Date();
+        // Đầu ngày hôm nay (00:00)
+        const startOfToday = new Date(now);
+            startOfToday.setHours(0, 0, 0, 0);
+        // Đầu ngày hôm qua
+        const startOfYesterday = new Date(startOfToday);
+        startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+        const result = await DailyDetailModel.findOne({
+            attributes: ['id', 'quantity_wasted'],
+            include: [
+                {
+                    model: DailyOperationModel,
+                    attributes: [],
+                    where: {
+                        brand_id: brandID,
+                        operation_date: {
+                            [Op.gte]: startOfYesterday, // >= 00:00 hôm qua
+                            [Op.lt]: startOfToday       // < 00:00 hôm nay
+                        }
+                    }
+                }
+            ],
+            order: [['quantity_wasted', 'DESC']],
+            raw: true
+        });
+        if(!result) return null;
+        const ResutlDetail = await DailyDetailModel.findOne({
+            attributes: ['id', 'quantity_prepared',
+                [
+                    sequelize.literal('(quantity_wasted / quantity_prepared) * 100'),
+                    'quantity_percent'
+                ]
+            ],
+            where: {
+                id: result.id
+            },
+            include:[
+                {
+                    model: DishModel,
+                    attributes: ['name']
+                }
+            ],
+            raw: true
+        });
+        return {result, ResutlDetail};
+    }
+    async getWarningDishTableYesterday(brandID) {
+    const now = new Date();
+
+    // 00:00 hôm nay
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+    // startOfToday.setDate(startOfToday.getDate()-6);
+
+    // 00:00 hôm qua
+    const startOfYesterday = new Date(startOfToday);
+    startOfYesterday.setDate(startOfYesterday.getDate() - 1);
+
+    const result = await DailyDetailModel.findAll({
+        attributes: [
+            'id',
+            'quantity_prepared',
+            'quantity_wasted',
+            'waste_cost',
+            [
+                sequelize.literal(`
+                    ROUND(
+                    (quantity_wasted::numeric / NULLIF(quantity_prepared, 0)::numeric) * 100,
+                    1
+                    )
+                `),
+                'waste_percent'
+                ]
+        ],
+        include: [
+            {
+                model: DailyOperationModel,
+                attributes: ["operation_date"],
+                where: {
+                    brand_id: brandID,
+                    operation_date: {
+                        [Op.gte]: startOfYesterday,
+                        [Op.lt]: startOfToday
+                    }
+                }
+            },
+            {
+                model: DishModel,
+                attributes: ['name']
+            }
+        ],
+        where: sequelize.literal(`
+            (quantity_wasted  / NULLIF(quantity_prepared, 0)) * 100 > 10
+        `),
+        raw: true
+    });
+
+    return result;
+}
 }
 
 module.exports = new DashboardRepository();

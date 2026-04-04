@@ -128,6 +128,22 @@ class DishesRepository {
             throw error;
         }
     }
+    // danh sách món ăn chờ của userID
+    async GetAllDishesFalseByUserID(userID, brand) {
+        try {
+            const dishes = await DishModel.findAll({
+                 where: { status: false, user_id: userID, brand_id: brand },
+                 attributes: ['id', 'name', 'price',"des","status"] ,
+                 include: [{
+                      model:   DishCategoryModel,
+                      attributes: ['name']
+                    }]
+                });
+            return dishes;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 
 module.exports = new DishesRepository();

@@ -8,6 +8,7 @@ const sequelize = require("../config/connectData");
 const jwt = require("jsonwebtoken");
 const crypto = require('crypto');
 const authServices = require("../services/AuthServices");
+const checkServices = require("../services/CheckServices");
  const tempUsers = new Map();
  const MAX_AGE = 15 * 60 * 1000; // 15 phút
 exports.register=async (req, res, next) => {

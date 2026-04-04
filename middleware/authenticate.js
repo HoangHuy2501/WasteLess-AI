@@ -3,7 +3,8 @@ const jwt= require('jsonwebtoken');
 // const ENV = require('../config/env.js');
 const logger = require('../utils/log.js');
 const ApiError = require("../utils/ApiError");
-module.exports = function authenticate(req, res, next) {
+const checkServices = require("../services/CheckServices");
+module.exports =async function authenticate (req, res, next) {
     try {
          if (!process.env.JWT_SECRET) {
             logger.error("🚨 Lỗi cấu hình: JWT_SECRET chưa được set trong biến môi trường.");
@@ -32,6 +33,8 @@ module.exports = function authenticate(req, res, next) {
         }
 
         logger.info(`✅ Xác thực thành công | userId: ${decoded.userId} | IP: ${req.ip}`);
+        await checkServices.checkBrand(decoded.brandID);
+        await checkServices.checkUserActive(decoded.userId);
         req.user = decoded; // lưu thông tin người dùng vào request
         next();
     } catch (error) {
